@@ -1,0 +1,14 @@
+﻿# Java build outputs
+*.class
+out/
+build/
+target/
+
+# IDE/workspace files
+.idea/
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
