@@ -8,6 +8,11 @@ target/
 .idea/
 *.ipr
 *.iws
+*.iml
+.env
+.env.*
+!.env.example
+.tools/
 
 # OS files
 .DS_Store
