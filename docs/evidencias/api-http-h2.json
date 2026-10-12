@@ -1,0 +1,154 @@
+﻿[
+    {
+        "data":  "2026-10-12T17:47:16.8832926-03:00",
+        "metodo":  "POST",
+        "rota":  "/api/trechos",
+        "corpo":  {
+                      "kmFinal":  11,
+                      "kmInicial":  10,
+                      "alturaVegetacao":  80,
+                      "monitoradoIoT":  true,
+                      "acessoDificil":  true,
+                      "codigoSensor":  101,
+                      "tipoAmbiente":  "umido"
+                  },
+        "status":  201,
+        "resposta":  "{\"id\":1,\"kmInicial\":10,\"kmFinal\":11,\"alturaVegetacao\":80,\"tipoAmbiente\":\"umido\",\"acessoDificil\":true,\"codigoSensor\":101,\"monitoradoIoT\":true}"
+    },
+    {
+        "data":  "2026-10-12T17:47:16.9298617-03:00",
+        "metodo":  "POST",
+        "rota":  "/api/equipes",
+        "corpo":  {
+                      "especialidade":  "Rocada Manual",
+                      "quantidadeIntegrantes":  4,
+                      "nome":  "Equipe teste API",
+                      "status":  "ATIVA"
+                  },
+        "status":  201,
+        "resposta":  "{\"id\":1,\"nome\":\"Equipe teste API\",\"especialidade\":\"Rocada Manual\",\"quantidadeIntegrantes\":4,\"status\":\"ATIVA\"}"
+    },
+    {
+        "data":  "2026-10-12T17:47:16.9828898-03:00",
+        "metodo":  "POST",
+        "rota":  "/api/intervencoes",
+        "corpo":  {
+                      "equipeId":  1,
+                      "observacao":  "Teste HTTP",
+                      "prioridade":  "URGENTE",
+                      "tipoServico":  "Rocada Manual",
+                      "trechoId":  1,
+                      "status":  "PROGRAMADA",
+                      "dataProgramada":  "2026-10-13"
+                  },
+        "status":  201,
+        "resposta":  "{\"id\":1,\"trechoId\":1,\"equipeId\":1,\"tipoServico\":\"Rocada Manual\",\"prioridade\":\"URGENTE\",\"status\":\"PROGRAMADA\",\"dataProgramada\":\"2026-10-13\",\"observacao\":\"Teste HTTP\"}"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.0049085-03:00",
+        "metodo":  "GET",
+        "rota":  "/api/trechos/1",
+        "corpo":  null,
+        "status":  200,
+        "resposta":  "{\"id\":1,\"kmInicial\":10,\"kmFinal\":11,\"alturaVegetacao\":80,\"tipoAmbiente\":\"umido\",\"acessoDificil\":true,\"codigoSensor\":101,\"monitoradoIoT\":true}"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.0209254-03:00",
+        "metodo":  "PUT",
+        "rota":  "/api/trechos/1",
+        "corpo":  {
+                      "acessoDificil":  true,
+                      "alturaVegetacao":  85,
+                      "tipoAmbiente":  "umido",
+                      "codigoSensor":  101,
+                      "kmInicial":  10,
+                      "monitoradoIoT":  true,
+                      "kmFinal":  11
+                  },
+        "status":  200,
+        "resposta":  "{\"id\":1,\"kmInicial\":10,\"kmFinal\":11,\"alturaVegetacao\":85,\"tipoAmbiente\":\"umido\",\"acessoDificil\":true,\"codigoSensor\":101,\"monitoradoIoT\":true}"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.0324333-03:00",
+        "metodo":  "PUT",
+        "rota":  "/api/equipes/1",
+        "corpo":  {
+                      "especialidade":  "Rocada Manual",
+                      "quantidadeIntegrantes":  4,
+                      "nome":  "Equipe teste atualizada",
+                      "status":  "ATIVA"
+                  },
+        "status":  200,
+        "resposta":  "{\"id\":1,\"nome\":\"Equipe teste atualizada\",\"especialidade\":\"Rocada Manual\",\"quantidadeIntegrantes\":4,\"status\":\"ATIVA\"}"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.0504502-03:00",
+        "metodo":  "PUT",
+        "rota":  "/api/intervencoes/1",
+        "corpo":  {
+                      "dataProgramada":  "2026-10-13",
+                      "tipoServico":  "Rocada Manual",
+                      "observacao":  "Teste HTTP",
+                      "status":  "CONCLUIDA",
+                      "equipeId":  1,
+                      "prioridade":  "URGENTE",
+                      "trechoId":  1
+                  },
+        "status":  200,
+        "resposta":  "{\"id\":1,\"trechoId\":1,\"equipeId\":1,\"tipoServico\":\"Rocada Manual\",\"prioridade\":\"URGENTE\",\"status\":\"CONCLUIDA\",\"dataProgramada\":\"2026-10-13\",\"observacao\":\"Teste HTTP\"}"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.1354913-03:00",
+        "metodo":  "POST",
+        "rota":  "/api/relatorios",
+        "corpo":  null,
+        "status":  201,
+        "resposta":  "{\"id\":1,\"dataGeracao\":\"2026-10-12T17:47:17.125488\",\"qtUrgente\":1,\"qtCritico\":0,\"qtAtencao\":0,\"qtNormal\":0,\"resumo\":\"Trecho KM 10 ao KM 11: URGENTE - Rocada Manual\\n\"}"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.1475071-03:00",
+        "metodo":  "GET",
+        "rota":  "/api/relatorios",
+        "corpo":  null,
+        "status":  200,
+        "resposta":  "[{\"id\":1,\"dataGeracao\":\"2026-10-12T17:47:17.125488\",\"qtUrgente\":1,\"qtCritico\":0,\"qtAtencao\":0,\"qtNormal\":0,\"resumo\":\"Trecho KM 10 ao KM 11: URGENTE - Rocada Manual\\n\"}]"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.3345705-03:00",
+        "metodo":  "GET",
+        "rota":  "/api/relatorios/periodo?inicio=2026-10-12T00:00:00\u0026fim=2026-10-13T00:00:00",
+        "corpo":  null,
+        "status":  200,
+        "resposta":  "[{\"id\":1,\"dataGeracao\":\"2026-10-12T17:47:17.125488\",\"qtUrgente\":1,\"qtCritico\":0,\"qtAtencao\":0,\"qtNormal\":0,\"resumo\":\"Trecho KM 10 ao KM 11: URGENTE - Rocada Manual\\n\"}]"
+    },
+    {
+        "data":  "2026-10-12T17:47:17.3454992-03:00",
+        "metodo":  "DELETE",
+        "rota":  "/api/intervencoes/1",
+        "corpo":  null,
+        "status":  204,
+        "resposta":  [
+
+                     ]
+    },
+    {
+        "data":  "2026-10-12T17:47:17.3718507-03:00",
+        "metodo":  "DELETE",
+        "rota":  "/api/equipes/1",
+        "corpo":  null,
+        "status":  204,
+        "resposta":  [
+
+                     ]
+    },
+    {
+        "data":  "2026-10-12T17:47:17.3808922-03:00",
+        "metodo":  "DELETE",
+        "rota":  "/api/trechos/1",
+        "corpo":  null,
+        "status":  204,
+        "resposta":  [
+
+                     ]
+    }
+]

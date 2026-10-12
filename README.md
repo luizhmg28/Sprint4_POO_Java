@@ -1,168 +1,204 @@
-# MOTIVA - Sprint 3
+# MOTIVA - Sprint 4
 
-Projeto Java do sistema MOTIVA para monitoramento de vegetacao em rodovias, evoluido na Sprint 3 com persistencia em banco Oracle usando JDBC puro.
+API REST para monitoramento de vegetacao em rodovias, equipes e intervencoes.
 
-## Objetivo Da Sprint
+Java 17, Spring Boot 4.1.1, Spring Data JPA, Maven e Oracle. O driver `ojdbc17` e resolvido pelo Maven.
 
-A Sprint 3 adiciona persistencia aos dados que antes existiam apenas em memoria e no console. O projeto agora conecta no Oracle, cria as tabelas do dominio, executa operacoes CRUD por meio de DAOs e grava o historico dos relatorios de prioridade.
-
-O projeto continua usando JDBC puro, conforme pedido na sprint. Por isso nao foi usado Spring Boot, JPA ou Hibernate.
-
-## Estrutura Do Projeto
-
-- `src/db`: conexao com o banco Oracle e inicializacao dos scripts SQL.
-- `src/dao`: classes DAO responsaveis por inserir, buscar, listar, atualizar e deletar dados.
-- `src/model`: entidades do sistema, como trecho, equipe, intervencao e relatorio.
-- `src/service`: regras de negocio do relatorio e servicos operacionais.
-- `src/main`: classe principal usada para demonstrar a sprint.
-- `lib/ojdbc17.jar`: driver JDBC do Oracle.
-- `motiva-criacao-banco.sql`: script de criacao das tabelas.
-- `motiva-dados-teste.sql`: script com dados iniciais para teste.
-
-## Por Que Existe Um Inicializador De Banco
-
-Nas aulas, o professor usou Spring Boot, que consegue executar arquivos SQL automaticamente por convencao. Em um projeto Spring Boot, arquivos como `schema.sql` e `data.sql` podem ser carregados pelo proprio framework.
-
-Nesta sprint, a exigencia e usar JDBC puro. Como JDBC nao executa scripts automaticamente, foi criada a classe `InicializadorBanco`. Ela cumpre uma funcao parecida com a inicializacao automatica do Spring Boot, mas sem usar Spring: o proprio Java le os arquivos `.sql` e envia os comandos para o Oracle usando JDBC.
-
-Esse recurso e acionado apenas quando o programa roda com o argumento `--setup-db`.
-
-## Banco De Dados
-
-As tabelas criadas pelo projeto sao:
-
-- `EQUIPE_MANUTENCAO`
-- `TRECHO_RODOVIA`
-- `INTERVENCAO_OPERACIONAL`
-- `RELATORIO_PRIORIDADE`
-
-O arquivo `motiva-criacao-banco.sql` remove as tabelas antigas, quando existirem, e cria a estrutura novamente. O arquivo `motiva-dados-teste.sql` insere dados iniciais para demonstrar as operacoes.
-
-Use `--setup-db` com cuidado, porque ele recria as tabelas e pode apagar dados anteriores.
-
-## Configuracao No IntelliJ
-
-1. Abra o projeto pela pasta `Sprint 3`.
-2. Confirme se o modulo ativo e `Sprint3_POO-Java`.
-3. Va em `File > Project Structure`.
-4. Em `Project`, selecione JDK 17 ou superior.
-5. Em `Modules`, selecione `Sprint3_POO-Java`.
-6. Abra a aba `Dependencies`.
-7. Confirme se existe a dependencia `lib/ojdbc17.jar`.
-8. Se nao existir, clique em `+`, escolha `JARs or directories` e selecione `Sprint3_POO-Java/lib/ojdbc17.jar`.
-9. Clique em `Apply` e depois em `OK`.
-
-O erro `Driver Oracle nao encontrado no classpath` acontece quando o `ojdbc17.jar` nao esta nas dependencias do modulo ou da configuracao de execucao.
-
-## Configuracao Da Conexao
-
-A conexao fica em `src/db/ConexaoBD.java`.
-
-Os parametros usados sao:
-
-- `HOST`
-- `PORTA`
-- `SERVICO`
-- `USUARIO`
-- `SENHA`
-
-Tambem e possivel configurar por variaveis de ambiente:
-
-- `ORACLE_HOST`
-- `ORACLE_PORTA`
-- `ORACLE_SERVICO`
-- `ORACLE_USUARIO`
-- `ORACLE_SENHA`
-
-Se as variaveis de ambiente nao forem configuradas, o sistema usa os valores padrao escritos em `ConexaoBD.java`.
-
-## Primeira Execucao Pelo IntelliJ
-
-1. Abra `src/main/Main.java`.
-2. Clique com o botao direito no arquivo.
-3. Escolha `Run 'Main.main()'`.
-4. Depois va em `Run > Edit Configurations`.
-5. Selecione a configuracao `Main`.
-6. No campo `Program arguments`, coloque:
+## Estrutura
 
 ```text
---setup-db
+src/main/java/br/com/motiva/
+  MotivaApplication.java
+  model/
+  repository/
+  service/
+  controller/
+  dto/
+  exception/
+src/main/resources/application.properties
+src/test/java/br/com/motiva/
+src/test/resources/application-test.properties
+database/
+docs/evidencias/
+scripts/
 ```
 
-7. Confira se o `Working directory` esta apontando para a pasta `Sprint 3` ou para `Sprint3_POO-Java`.
-8. Clique em `Apply`.
-9. Clique em `OK`.
-10. Rode o `Main` novamente.
+Controllers recebem HTTP e chamam Services. Services validam os dados e acessam Repositories. DTOs definem os corpos da API.
 
-Com `--setup-db`, o programa conecta no Oracle, executa `motiva-criacao-banco.sql`, executa `motiva-dados-teste.sql` e depois roda a demonstracao dos DAOs.
+## Banco Oracle
 
-## Execucoes Depois Da Primeira
+Conexao padrao: `jdbc:oracle:thin:@oracle.fiap.com.br:1521:ORCL`.
 
-Depois que o banco ja estiver criado, remova o argumento:
+| Variavel | Uso |
+| --- | --- |
+| ORACLE_USUARIO | Usuario do schema |
+| ORACLE_SENHA | Senha do schema |
+| ORACLE_URL | URL opcional para outra instancia |
+| PORT | Porta HTTP, padrao 8080 |
 
-```text
---setup-db
-```
+O schema existente usa IDs com `IDENTITY`. O script `database/migracao-sequences.sql` converte esses geradores em sequences nomeadas, iniciadas acima do maior ID de cada tabela. Os registros e relacionamentos sao preservados. A execucao deve ocorrer com a API e outros escritores parados.
 
-Assim o programa nao recria as tabelas toda vez. Ele apenas conecta no banco, executa os testes de CRUD e grava um novo relatorio.
+No SQL Developer, conectado ao schema do projeto, a preparacao do banco existente consiste em executar `database/migracao-sequences.sql` como script (F5).
 
-## O Que O Main Demonstra
+Para um schema vazio, a ordem e `database/criacao-oracle.sql` e, opcionalmente, `database/dados-teste.sql`. O script de criacao nao remove tabelas e nao deve ser executado sobre o schema existente.
 
-A classe `main.Main` executa:
+| Entidade | Tabela | Sequence |
+| --- | --- | --- |
+| TrechoRodovia | TRECHO_RODOVIA | SEQ_TRECHO_RODOVIA |
+| EquipeManutencao | EQUIPE_MANUTENCAO | SEQ_EQUIPE_MANUTENCAO |
+| IntervencaoOperacional | INTERVENCAO_OPERACIONAL | SEQ_INTERVENCAO_OPERACIONAL |
+| RelatorioPrioridade | RELATORIO_PRIORIDADE | SEQ_RELATORIO_PRIORIDADE |
 
-- teste de conexao com Oracle;
-- CRUD de `EquipeManutencao`;
-- CRUD de `TrechoRodovia`;
-- CRUD de `IntervencaoOperacional`;
-- geracao de relatorio no console;
-- gravacao do relatorio em `RELATORIO_PRIORIDADE`;
-- listagem do historico de relatorios;
-- remocao dos registros temporarios criados durante o teste.
+Cada entidade usa `@SequenceGenerator` com `allocationSize = 1`. Booleanos continuam armazenados como `S/N`. Intervencoes usam `@ManyToOne` para trecho e equipe, sem exclusao em cascata.
 
-## Execucao Pelo Terminal
+`ddl-auto=validate` confere o esquema ao iniciar. A aplicacao nao cria nem apaga tabelas automaticamente.
 
-Na pasta `Sprint3_POO-Java`, compile com:
+## Execucao
+
+Requisitos: JDK 17 e acesso ao Oracle. O Maven Wrapper baixa o Maven na primeira execucao.
+
+Com as variaveis de ambiente configuradas:
 
 ```powershell
-javac -encoding UTF-8 -cp "lib\ojdbc17.jar" -d out (Get-ChildItem src -Filter *.java -Recurse).FullName
+.\mvnw.cmd spring-boot:run
 ```
 
-Para preparar o banco e rodar:
+Com Maven instalado: `mvn spring-boot:run`. No Linux/macOS: `sh mvnw spring-boot:run`.
+
+No IntelliJ, o projeto e importado pelo `pom.xml`, com SDK 17. A classe principal e `br.com.motiva.MotivaApplication`; as variaveis do Oracle pertencem a configuracao de execucao.
+
+Base HTTP: `http://localhost:8080/api`.
+
+## Endpoints
+
+| Metodo | Rota | Sucesso | Erros de entrada |
+| --- | --- | --- | --- |
+| GET | /api/trechos | 200 | 400 |
+| GET | /api/trechos/{id} | 200 | 400, 404 |
+| POST | /api/trechos | 201 + Location | 400 |
+| PUT | /api/trechos/{id} | 200 | 400, 404 |
+| DELETE | /api/trechos/{id} | 204 | 400, 404 |
+| GET | /api/equipes | 200 | 400 |
+| GET | /api/equipes/{id} | 200 | 400, 404 |
+| POST | /api/equipes | 201 + Location | 400 |
+| PUT | /api/equipes/{id} | 200 | 400, 404 |
+| DELETE | /api/equipes/{id} | 204 | 400, 404 |
+| GET | /api/intervencoes | 200 | 400 |
+| GET | /api/intervencoes/{id} | 200 | 400, 404 |
+| POST | /api/intervencoes | 201 + Location | 400, 404 |
+| PUT | /api/intervencoes/{id} | 200 | 400, 404 |
+| DELETE | /api/intervencoes/{id} | 204 | 400, 404 |
+| POST | /api/relatorios | 201 | 400 |
+| GET | /api/relatorios | 200 | - |
+| GET | /api/relatorios/periodo?inicio=...&fim=... | 200 | 400 |
+
+Filtros opcionais com derived queries:
+
+- `GET /api/trechos?alturaMinima=60`
+- `GET /api/equipes?status=ATIVA`
+- `GET /api/intervencoes?tipoServico=Rocada%20Manual`
+
+O periodo recebe data e hora ISO 8601 sem fuso, como `2026-10-12T00:00:00`. Os limites sao inclusivos. O historico usa o horario local do servidor e precisao de microssegundos.
+
+## Validacoes
+
+- KM inicial entre 0 e 999999; KM final maior que o inicial e no maximo 999999.
+- Altura entre 0 e 9999.99 cm, com ate duas casas decimais.
+- Trecho monitorado exige codigo de sensor positivo, com ate dez digitos.
+- Equipe exige nome, especialidade e entre 1 e 999 integrantes.
+- Status de equipe: `ATIVA`, `INATIVA`, `EM_CAMPO`.
+- Intervencao exige trecho e equipe existentes, tipo de servico, prioridade, status e data.
+- Prioridades: `NORMAL`, `ATENCAO`, `CRITICO`, `URGENTE`.
+- Status de intervencao: `PROGRAMADA`, `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA`.
+- Trechos e equipes com intervencoes vinculadas nao podem ser removidos.
+- PUT substitui todos os campos do cadastro.
+
+Bean Validation valida os DTOs na entrada e novamente no Service. As regras entre campos ficam no Service. Erros usam `application/problem+json`, com status e descricao; erros de campos tambem incluem `campos`.
+
+## Motor De Prioridade
+
+O motor preserva os limiares do projeto:
+
+| Condicao | Prioridade | Acao |
+| --- | --- | --- |
+| Altura < 30 cm | NORMAL | Monitoramento |
+| 30 cm <= altura <= 60 cm | ATENCAO | Pulverizacao |
+| Altura > 60 cm e acesso dificil | URGENTE | Rocada Manual |
+| Altura > 60 cm e acesso adequado | CRITICO | Rocada Mecanizada |
+
+`GeradorRelatorio` calcula prioridades e grava totais, resumo e data em uma transacao. Gerar relatorio nao altera medicoes, nao simula sensores e nao executa intervencoes. Sem trechos, os totais sao zero. O historico permanece depois da exclusao dos cadastros.
+
+## Exemplos cURL
+
+Exemplos para Bash, com `jq` para extrair os IDs das respostas. O fluxo PowerShell esta em `scripts/testar-api.ps1`.
+
+```bash
+trecho=$(curl -fsS -X POST http://localhost:8080/api/trechos -H 'Content-Type: application/json' -d '{"kmInicial":10,"kmFinal":11,"alturaVegetacao":80,"tipoAmbiente":"umido","acessoDificil":true,"codigoSensor":101,"monitoradoIoT":true}')
+trecho_id=$(printf '%s' "$trecho" | jq -r '.id')
+
+equipe=$(curl -fsS -X POST http://localhost:8080/api/equipes -H 'Content-Type: application/json' -d '{"nome":"Equipe Norte","especialidade":"Rocada Manual","quantidadeIntegrantes":4,"status":"ATIVA"}')
+equipe_id=$(printf '%s' "$equipe" | jq -r '.id')
+
+corpo=$(jq -n --argjson t "$trecho_id" --argjson e "$equipe_id" '{trechoId:$t,equipeId:$e,tipoServico:"Rocada Manual",prioridade:"URGENTE",status:"PROGRAMADA",dataProgramada:"2026-10-20",observacao:"Inspecao"}')
+intervencao=$(curl -fsS -X POST http://localhost:8080/api/intervencoes -H 'Content-Type: application/json' -d "$corpo")
+intervencao_id=$(printf '%s' "$intervencao" | jq -r '.id')
+
+curl -i "http://localhost:8080/api/trechos/$trecho_id"
+curl -i -X PUT "http://localhost:8080/api/trechos/$trecho_id" -H 'Content-Type: application/json' -d '{"kmInicial":10,"kmFinal":11,"alturaVegetacao":85,"tipoAmbiente":"umido","acessoDificil":true,"codigoSensor":101,"monitoradoIoT":true}'
+curl -i -X POST http://localhost:8080/api/relatorios
+curl -i http://localhost:8080/api/relatorios
+curl -i 'http://localhost:8080/api/relatorios/periodo?inicio=2026-01-01T00:00:00&fim=2026-12-31T23:59:59.999999'
+curl -i -X DELETE "http://localhost:8080/api/intervencoes/$intervencao_id"
+curl -i -X DELETE "http://localhost:8080/api/equipes/$equipe_id"
+curl -i -X DELETE "http://localhost:8080/api/trechos/$trecho_id"
+curl -i "http://localhost:8080/api/trechos/$trecho_id"
+```
+
+O ultimo GET retorna 404.
+
+## Testes E Registros
 
 ```powershell
-java -cp "out;lib\ojdbc17.jar" main.Main --setup-db
+.\mvnw.cmd clean verify
 ```
 
-Para rodar sem recriar o banco:
+Os testes usam `@SpringBootTest`, MockMvc e H2 em modo Oracle, sem credenciais e sem acessar o banco remoto. Cobrem CRUD, respostas 200/201/204/400/404, filtros, vinculos, validacao no Service, limites do motor, historico e periodo.
+
+`target/evidencias/requisicoes.md` e gerado pelo teste de fluxo completo. Um registro da execucao esta em [docs/evidencias/requisicoes.md](docs/evidencias/requisicoes.md). O fluxo HTTP do script tambem foi executado com H2 local: [api-http-h2.json](docs/evidencias/api-http-h2.json). Esses registros nao comprovam a conexao com o Oracle.
+
+Com a API conectada ao Oracle:
 
 ```powershell
-java -cp "out;lib\ojdbc17.jar" main.Main
+.\scripts\testar-api.ps1
 ```
 
-## Verificacao No Oracle
+O script registra as respostas em `target/evidencias/api-http.json`. Cria cadastros temporarios, gera um relatorio e remove apenas os cadastros criados. O relatorio permanece no historico.
 
-Depois de rodar o projeto, consulte:
+O JAR gerado pode ser iniciado com:
 
-```sql
-SELECT COUNT(*) FROM EQUIPE_MANUTENCAO;
-SELECT COUNT(*) FROM TRECHO_RODOVIA;
-SELECT COUNT(*) FROM INTERVENCAO_OPERACIONAL;
-SELECT COUNT(*) FROM RELATORIO_PRIORIDADE;
+```shell
+java -jar target/motiva-api-4.0.0.jar
 ```
 
-Para conferir os relatorios gravados:
+## Perguntas De Reflexao
 
-```sql
-SELECT ID, DATA_GERACAO, QT_URGENTE, QT_CRITICO, QT_ATENCAO, QT_NORMAL
-FROM RELATORIO_PRIORIDADE
-ORDER BY ID DESC;
-```
+**Por que Repository e uma interface? Quem implementa e quando?**
 
-## Problemas Comuns
+A interface declara as operacoes e os tipos usados. Ao iniciar o contexto da aplicacao, o Spring Data cria um proxy que fornece o comportamento do repository. As operacoes comuns usam a implementacao do framework; metodos de consulta sao interpretados a partir de seus nomes.
 
-- `Driver Oracle nao encontrado no classpath`: adicione `lib/ojdbc17.jar` nas dependencias do modulo.
-- `ORA-01017`: usuario ou senha incorretos.
-- `ORA-00942`: as tabelas ainda nao foram criadas; rode com `--setup-db`.
-- `ORA-02292`: existe registro relacionado por chave estrangeira.
-- `Arquivo SQL nao encontrado`: confira o `Working directory` da configuracao de execucao.
-- Erro com `record`: o projeto esta rodando com Java anterior ao 16; use JDK 17 ou superior.
+**O DAO morreu na migracao?**
+
+Nao. A responsabilidade de acesso aos dados continua existindo. O Repository assume esse papel e o framework cuida da implementacao que antes era escrita em cada DAO.
+
+**Por que validar a altura no Service?**
+
+A altura negativa e invalida para o dominio, independentemente da origem dos dados. No Service, a regra tambem vale para chamadas feitas fora do HTTP. O Controller cuida do contrato da requisicao.
+
+**Onde esta o SQL de uma consulta pelo tipo?**
+
+O Spring Data interpreta o nome do metodo e monta a consulta JPA. O Hibernate gera o SQL adequado ao Oracle. Neste projeto, `findByTipoServicoOrderByIdAsc` busca intervencoes pelo campo `tipoServico`; nao existe SQL manual no Repository, Service ou Controller.
+
+## Referencias
+
+- [Spring Boot: requisitos](https://docs.spring.io/spring-boot/system-requirements.html)
+- [Spring Data JPA: consultas](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
